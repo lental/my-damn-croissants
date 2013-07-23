@@ -1,0 +1,27 @@
+.row {
+display:block;
+}
+
+body {
+
+overflow:hidden;
+
+}
+
+.cell {
+display:inline-block;
+min-width:50px;
+min-height:50px;
+border:1px solid black;
+margin:1px;
+}
+
+.table {
+  background-color:black;
+
+}
+
+#audio_toggle {
+vertical-align:top;
+
+}
