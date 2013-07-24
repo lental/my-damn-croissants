@@ -46,13 +46,12 @@ function Board() {
   };
   heroImage.src = "https://www.gravatar.com/avatar/42cefdfc8bf68676484cebf431329369?s=32&d=identicon&r=PG";
 
-  var monsterReady = false;
-  var monsterImage = new Image();
-  monsterImage.onload = function () {
-    monsterReady = true;
+  var kanyeReady = false;
+  var kanyeImage = new Image();
+  kanyeImage.onload = function () {
+    kanyeReady = true;
   };
-  //monsterImage.src= "https://www.gravatar.com/avatar/c8b387c489181844b3ffc704fadc0f14?s=32&d=identicon&r=PG";
-  monsterImage.src= "img/kanye.png";
+  kanyeImage.src= "img/kanye.png";
 
   var fedyeReady = false;
   var fedyeImage = new Image();
@@ -66,10 +65,9 @@ function Board() {
   croissantImage.onload = function () {
     croissantReady = true;
   };
-  //monsterImage.src= "https://www.gravatar.com/avatar/c8b387c489181844b3ffc704fadc0f14?s=32&d=identicon&r=PG";
   croissantImage.src= "img/croissant.png";
 
-  var monster = function(){
+  var kanye = function(){
     this.x = 0;
     this.y = 0;
     this.yOffset = -32;
@@ -89,18 +87,18 @@ function Board() {
   };
 
 
-  var monsters = [];
+  var kanyes = [];
   var chunks = 4
   var hungryKanyes = chunks * chunks;
   var hero = new hero();
 
-  // Reset the game when the player catches a monster
+  // Reset the game when the player catches a kanye
   this.reset = function () {
     hero.x = board.width / 2;
     hungryKanyes = chunks * chunks;
     hero.y = 0;
     hero.ammo = 5;
-    monsters = [];
+    kanyes = [];
 
     //place tables randomly, one per chunk of space
     var chunkWidth  = board.width / chunks
@@ -108,12 +106,12 @@ function Board() {
 
     for(var row = 0; row < chunks; row++) {
       for(var col = 0; col < chunks; col++) {
-        var mob = new monster();
+        var mob = new kanye();
         mobx = Math.random()  * (chunkWidth - mob.width) + chunkWidth * col;
         moby = Math.random()  * (chunkHeight - mob.height) + 32 + chunkHeight * row;
         mob.x = mobx;
         mob.y = moby;
-        monsters.push(mob);
+        kanyes.push(mob);
       }
     }
   };
@@ -128,9 +126,9 @@ function Board() {
       ctx.drawImage(heroImage, hero.x, hero.y);
     }
 
-    if (monsterReady) {
-      for(var i = 0; i < monsters.length; i++) {
-        var mob = monsters[i];
+    if (kanyeReady) {
+      for(var i = 0; i < kanyes.length; i++) {
+        var mob = kanyes[i];
 
         //If kanye has finished his current croissant
         if(!mob.isHungry && mob.timeToEat <= 0) {
@@ -145,7 +143,7 @@ function Board() {
           mob.timeToEat--;
           ctx.drawImage(fedyeImage, mob.x, mob.y + mob.yOffset);
         } else {
-          ctx.drawImage(monsterImage, mob.x, mob.y + mob.yOffset);
+          ctx.drawImage(kanyeImage, mob.x, mob.y + mob.yOffset);
         }
       }
     }
@@ -170,8 +168,8 @@ function Board() {
   };
 
   function collidingMonster() {
-    for (var i = 0; i < monsters.length; i++) {
-      var mob = monsters[i];
+    for (var i = 0; i < kanyes.length; i++) {
+      var mob = kanyes[i];
       var xCollision =(hero.x < mob.x + mob.width && hero.x > mob.x) ||
                       (mob.x < hero.x + hero.width && mob.x > hero.x);
       var yCollision = (hero.y < mob.y + mob.height && hero.y > mob.y) ||
