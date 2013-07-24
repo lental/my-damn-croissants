@@ -5,13 +5,18 @@ function Board() {
   var canvas;
   canvas = $('canvas#game')[0];
   var ctx = canvas.getContext("2d");
-  canvas.width = 512;
-  canvas.height = 480;
+  canvas.width = 565;
+  canvas.height = 512;
+
+  var board = new Object();
+  board.topDeadSpace = 32
+  board.width=512;
+  board.height=480;
 
 
-this.audio = new Audio('croissant.mp3');
-this.audio.loop = true;
-this.audio.play();
+  this.audio = new Audio('croissant.mp3');
+  this.audio.loop = true;
+  this.audio.play();
 
   // Handle keyboard controls
   var keysDown = {};
@@ -25,7 +30,14 @@ this.audio.play();
   bgImage.onload = function () {
     bgReady = true;
   };
-  bgImage.src = "http://farm7.static.flickr.com/6203/6084194152_35c3e3ba34_z.jpg";
+  bgImage.src = "img/kanyeground.png";
+
+  var restaurantReady = false;
+  var restaurantImage = new Image();
+  restaurantImage.onload = function () {
+    restaurantReady = true;
+  };
+  restaurantImage.src = "img/restaurant.png";
 
   var heroReady = false;
   var heroImage = new Image();
@@ -39,42 +51,65 @@ this.audio.play();
   monsterImage.onload = function () {
     monsterReady = true;
   };
-  monsterImage.src= "https://www.gravatar.com/avatar/c8b387c489181844b3ffc704fadc0f14?s=32&d=identicon&r=PG";
+  //monsterImage.src= "https://www.gravatar.com/avatar/c8b387c489181844b3ffc704fadc0f14?s=32&d=identicon&r=PG";
+  monsterImage.src= "img/kanye.png";
+
+  var fedyeReady = false;
+  var fedyeImage = new Image();
+  fedyeImage.onload = function () {
+    fedyeReady = true;
+  };
+  fedyeImage.src= "img/fedye.png";
+
+  var croissantReady = false;
+  var croissantImage = new Image();
+  croissantImage.onload = function () {
+    croissantReady = true;
+  };
+  //monsterImage.src= "https://www.gravatar.com/avatar/c8b387c489181844b3ffc704fadc0f14?s=32&d=identicon&r=PG";
+  croissantImage.src= "img/croissant.png";
 
   var monster = function(){
     this.x = 0;
     this.y = 0;
-    this.width = 32;
+    this.yOffset = -32;
+    this.width = 40;
     this.height = 32;
+    this.isHungry = true;
+    this.timeToEat = 0;
   };
 
   var hero = function(){
-      this.speed = 256; // movement in pixels per second
+      this.speed = 350; // movement in pixels per second
       this.x = 0;
       this.y = 0;
       this.width = 32;
       this.height = 32;
+      this.ammo=5;
   };
 
 
-var monstersCaught = 0;
-var monsters = [];
-var hero = new hero();
+  var monsters = [];
+  var chunks = 4
+  var hungryKanyes = chunks * chunks;
+  var hero = new hero();
 
   // Reset the game when the player catches a monster
   this.reset = function () {
-    hero.x = canvas.width / 2;
-    hero.y = canvas.height / 2;
+    hero.x = board.width / 2;
+    hero.y = 0;
+    hero.ammo = 5;
+    monsters = [];
 
     //place tables randomly, one per chunk of space
-    chunks = 4
-    var chunkWidth  = canvas.width / chunks
-    var chunkHeight = canvas.height / chunks
+    var chunkWidth  = board.width / chunks
+    var chunkHeight = (board.height - 32) / chunks
+
     for(var row = 0; row < chunks; row++) {
       for(var col = 0; col < chunks; col++) {
         var mob = new monster();
         mobx = Math.random()  * (chunkWidth - mob.width) + chunkWidth * col;
-        moby = Math.random()  * (chunkHeight - mob.height) + chunkHeight * row;
+        moby = Math.random()  * (chunkHeight - mob.height) + 32 + chunkHeight * row;
         mob.x = mobx;
         mob.y = moby;
         monsters.push(mob);
@@ -95,32 +130,65 @@ var hero = new hero();
     if (monsterReady) {
       for(var i = 0; i < monsters.length; i++) {
         var mob = monsters[i];
-        ctx.drawImage(monsterImage, mob.x, mob.y);
+
+        //If kanye has finished his current croissant
+        if(!mob.isHungry && mob.timeToEat <= 0) {
+          mob.isHungry = true;
+          if (hungryKanyes == 0) {
+            $(".god").text("");
+          }
+          hungryKanyes++;
+        }
+
+        if(!mob.isHungry) {
+          mob.timeToEat--;
+          ctx.drawImage(fedyeImage, mob.x, mob.y + mob.yOffset);
+        } else {
+          ctx.drawImage(monsterImage, mob.x, mob.y + mob.yOffset);
+        }
       }
+    }
+    if (restaurantReady) {
+      ctx.drawImage(restaurantImage, canvas.width-70, 0);
+    }
+  // Score
+    ctx.fillStyle = "rgb(250, 250, 250)";
+    ctx.font = "24px Helvetica";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("Croissants: ", 4, canvas.height - 28);
+
+    if (croissantReady) {
+      for (var i = 0; i < hero.ammo; i++) {
+        ctx.drawImage(croissantImage, 130 + i * 35, canvas.height - 32);
+      }
+    }
+    if (hungryKanyes == 0) {
+    $(".god").text("ALL KANYES FED. YOU ARE A GOD");
     }
   };
 
-  function areColliding() {
+  function collidingMonster() {
     for (var i = 0; i < monsters.length; i++) {
       var mob = monsters[i];
-      var xCollision =(hero.x < mob.x + mob.width && hero.x > mob.x) || 
+      var xCollision =(hero.x < mob.x + mob.width && hero.x > mob.x) ||
                       (mob.x < hero.x + hero.width && mob.x > hero.x);
       var yCollision = (hero.y < mob.y + mob.height && hero.y > mob.y) ||
                        (mob.y < hero.y + hero.height && mob.y > hero.y);
 
       if (xCollision && yCollision) {
-       return true;
+       return mob;
       }
    }
 
-   return false;
+   return null;
   };
 
   function outOfXBounds() {
-    return hero.x < 0  || hero.x + hero.width > canvas.width;
+    return hero.x < 0  || hero.x + hero.width > board.width;
   }
   function outOfYBounds() {
-    return hero.y < 0  || hero.y + hero.height > canvas.height;
+    return hero.y < 0  || hero.y + hero.height > board.height;
   }
 
   // Update game objects
@@ -134,17 +202,48 @@ var hero = new hero();
     if (40 in keysDown) { // Player holding down
       hero.y += hero.speed * modifier;
     }
-    if (areColliding() || outOfYBounds()) {
+
+    var collision = collidingMonster();
+    if (collision) {
+      if (collision.isHungry && hero.ammo > 0){
+        hero.ammo--;
+        collision.isHungry = false;
+        hungryKanyes--;
+        collision.timeToEat = Math.random() * 1200 + 500;
+      }
       hero.y = oldy;
     }
+
+    if (outOfYBounds()) {
+      hero.y = oldy;
+    }
+
     if (37 in keysDown) { // Player holding left
       hero.x -= hero.speed * modifier;
     }
     if (39 in keysDown) { // Player holding right
       hero.x += hero.speed * modifier;
     }
-    if (areColliding() || outOfXBounds()) {
+
+   collision = collidingMonster();
+    if (collision) {
+      if (collision.isHungry && hero.ammo > 0){
+        hero.ammo--;
+        collision.isHungry = false;
+        hungryKanyes--;
+        collision.timeToEat = Math.random() * 10000 + 5000;
+      }
       hero.x = oldx;
+    }
+    if (outOfXBounds()) {
+      if (hero.x + hero.width >= board.width) {
+        hero.ammo = 8;
+      }
+      hero.x = oldx;
+    }
+
+    if (hero.x + hero.width == board.width) {
+      ammo = 10;
     }
   };
 
@@ -176,6 +275,9 @@ function initialize() {
 board = new Board();
 audioToggle = $('#audio_toggle');
 audioToggle.click(toggleAudio);
+
+resetButton = $('#reset_button');
+resetButton.click(board.reset);
 
 board.reset();
 setInterval(board.mainLoop, 1);

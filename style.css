@@ -21,7 +21,22 @@ margin:1px;
 
 }
 
-#audio_toggle {
+.options {
+display:inline-block;
 vertical-align:top;
+}
+
+.options_button {
+display:block;
+vertical-align:top;
+}
+.title {
+  font-family:sans-serif;
+font-size: 40px;
+}
+
+.god {
+font-size: 24px;
+color:#229922;
 
 }
