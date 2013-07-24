@@ -97,6 +97,7 @@ function Board() {
   // Reset the game when the player catches a monster
   this.reset = function () {
     hero.x = board.width / 2;
+    hungryKanyes = chunks * chunks;
     hero.y = 0;
     hero.ammo = 5;
     monsters = [];
